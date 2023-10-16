@@ -11,7 +11,7 @@ import sys
 import os
 import re
 import random
-import math
+import math 
 import datetime
 
 import arguments
@@ -43,6 +43,7 @@ torch.backends.cudnn.benchmark= True
 # device
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda:{}".format(args_input.gpu) if use_cuda else "cpu")
+print(device)
 
 #recording
 sys.stdout = Logger(os.path.abspath('') + '/logfile/' + DATA_NAME+ '_'  + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) +  '_' + str(args_input.quota) + '_normal_log.txt')
@@ -76,9 +77,8 @@ while (iteration > 0):
 	diffuser = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
 	diffuser.scheduler = DPMSolverMultistepScheduler.from_config(diffuser.scheduler.config)
 	diffuser = diffuser.to(device)
-
-	strategy = get_strategy(args_input.ALstrategy, dataset, net,diffuser, args_input, args_task)  # load strategy
-
+	diffuser.enable_vae_slicing()
+	strategy = get_strategy(args_input.ALstrategy, dataset, net, diffuser, args_input, args_task)  # load strategy
 	start = datetime.datetime.now()
 
 
@@ -93,7 +93,7 @@ while (iteration > 0):
 	new_Y = torch.empty(0)
 		
 	# print info
-	print(DATA_NAME)
+	print(f'Working on {DATA_NAME} dataset')
 	print('RANDOM SEED {}'.format(SEED))
 	print(type(strategy).__name__)
 	
@@ -102,7 +102,7 @@ while (iteration > 0):
 		strategy.train(model_name = args_input.ALstrategy)
 	else:
 		strategy.train()
-		strategy.GAL_train(cycle=0)
+		# strategy.GAL_train(cycle=0)
 	preds = strategy.predict(dataset.get_test_data())
 	acc[0] = dataset.cal_test_acc(preds)
 	print('Round 0\ntesting accuracy {}'.format(acc[0]))
@@ -129,7 +129,7 @@ while (iteration > 0):
 			strategy.train(model_name = args_input.ALstrategy)
 		else:
 			strategy.train()
-			strategy.GAL_train(cycle=rd+1)
+			# strategy.GAL_train(cycle=rd+1)
 	
 		# round rd accuracy
 		preds = strategy.predict(dataset.get_test_data())

@@ -61,6 +61,48 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
             )
             embeddings.append(prompt_embeds)
 
+    elif dataset == "svhn":
+        for prompt in labels:
+            prompt='a house number style image of a single digit' + prompt
+            prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
+                prompt=prompt,
+                device=device,
+                num_images_per_prompt=num_images_per_prompt,
+                do_classifier_free_guidance=True,
+            )
+            embeddings.append(prompt_embeds)
+
+    elif dataset == "cifar100":
+        # labels = ["Airplane"]
+        for prompt in labels:
+            if prompt=="Automobile":
+                prompt="Car"
+            prompt='a photo of a ' + prompt
+            prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
+                prompt=prompt,
+                device=device,
+                num_images_per_prompt=num_images_per_prompt,
+                do_classifier_free_guidance=True,
+            )
+            embeddings.append(prompt_embeds)
+
+
+    elif dataset == "tinyimagenet":
+        for prompt in labels:
+            prompt = prompt.split(", ")
+            transformed_prompt = ["A photo of a " + prompt[0]]
+            for word in prompt[1:]:
+                transformed_prompt.append("or a " + word)
+            prompt = ' '.join(transformed_words)
+
+            prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
+                prompt=prompt,
+                device=device,
+                num_images_per_prompt=num_images_per_prompt,
+                do_classifier_free_guidance=True,
+            )
+            embeddings.append(prompt_embeds)
+
     # return torch.cat(embeddings,dim=0)
     return embeddings
 def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,epsilon,labels,model,diffuser,device,AL_function):
@@ -113,7 +155,7 @@ def current_model_sample_score(model,image,device):
 def dataset_sampling(diffuser,sample_per_class,sample_per_prompt,embedding_list_updated,labels,cycle,data_folder):
 
     if not os.path.exists(data_folder):
-        os.mkdir(data_folder)
+        os.makedirs(data_folder)
     epoch_folder=os.path.join(data_folder,"cycle{}".format(cycle))
     if not os.path.exists(epoch_folder):
         os.mkdir(epoch_folder)
