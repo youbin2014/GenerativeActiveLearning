@@ -93,7 +93,7 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
             transformed_prompt = ["A photo of a " + prompt[0]]
             for word in prompt[1:]:
                 transformed_prompt.append("or a " + word)
-            prompt = ' '.join(transformed_words)
+            prompt = ' '.join(transformed_prompt)
 
             prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
                 prompt=prompt,
