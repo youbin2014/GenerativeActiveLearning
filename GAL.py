@@ -40,18 +40,24 @@ def update_train_loader(data_folder,train_subset,cycle,dataset_name):
                                  (0.2470, 0.2435, 0.2616))
         ])
     elif dataset_name == 'cifar100':
-        transform = transforms.Compose([transforms.RandomCrop(size=32, padding=4),
-                            transforms.RandomHorizontalFlip(),
-                            transforms.ToTensor(),
-                            transforms.Normalize((0.5071, 0.4865, 0.4409),
-                                                 (0.2673, 0.2564, 0.2762))
+        transform = transforms.Compose([
+            transforms.Resize((32, 32)),
+            transforms.RandomCrop(size=32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5071, 0.4865, 0.4409),
+                                 (0.2673, 0.2564, 0.2762))
         ])
 
     elif dataset_name == 'tinyimagenet':
-        transform = transforms.Compose(
-                      [transforms.RandomRotation(20), transforms.RandomHorizontalFlip(0.5), transforms.ToTensor(),
-                       transforms.Normalize([0.4802, 0.4481, 0.3975], [0.2302, 0.2265, 0.2262])
-                       ])
+        transform = transforms.Compose([
+            transforms.Resize((64, 64)),
+            transforms.RandomRotation(20),
+            transforms.RandomHorizontalFlip(0.5),
+            transforms.ToTensor(),
+            transforms.Normalize([0.4802, 0.4481, 0.3975],
+                                 [0.2302, 0.2265, 0.2262])
+       ])
 
     labeled_dataset = ImageFolder(root=os.path.join(data_folder, "cycle{}".format(cycle)),
                           transform=transform)
