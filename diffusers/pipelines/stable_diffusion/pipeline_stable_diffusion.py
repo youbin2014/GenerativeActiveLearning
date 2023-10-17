@@ -542,6 +542,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
         return latents
 
     def compute_gradient(self,
+        dataset_name: str,
         prompt: Union[str, List[str]] = None,
         model:torch.nn.Module =None,
         AL_function: Callable =None,
@@ -705,7 +706,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
         else:
             image = latents
             has_nsfw_concept = None
-        AL_target=AL_function(image,model)
+        AL_target=AL_function(dataset_name,image,model)
 
         grad = torch.autograd.grad(AL_target, prompt_embeds,
                                    retain_graph=False, create_graph=False)[0]

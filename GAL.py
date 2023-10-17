@@ -29,15 +29,29 @@ class CombinedDataset(Dataset):
     def __len__(self):
         return len(self.dataset1) + len(self.dataset2)
 
-def update_train_loader(data_folder,train_subset,cycle):
-    transform = transforms.Compose([
-        transforms.Resize((32, 32)),  # Resize images to CIFAR10 resolution
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465),
-                             (0.2470, 0.2435, 0.2616))
-    ])
+def update_train_loader(data_folder,train_subset,cycle,dataset_name):
+    if dataset_name == 'cifar10':
+        transform = transforms.Compose([
+            transforms.Resize((32, 32)),  # Resize images to CIFAR10 resolution
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465),
+                                 (0.2470, 0.2435, 0.2616))
+        ])
+    elif dataset_name == 'cifar100':
+        transform = transforms.Compose([transforms.RandomCrop(size=32, padding=4),
+                            transforms.RandomHorizontalFlip(),
+                            transforms.ToTensor(),
+                            transforms.Normalize((0.5071, 0.4865, 0.4409),
+                                                 (0.2673, 0.2564, 0.2762))
+        ])
+
+    elif dataset_name == 'tinyimagenet':
+        transform = transforms.Compose(
+                      [transforms.RandomRotation(20), transforms.RandomHorizontalFlip(0.5), transforms.ToTensor(),
+                       transforms.Normalize([0.4802, 0.4481, 0.3975], [0.2302, 0.2265, 0.2262])
+                       ])
 
     labeled_dataset = ImageFolder(root=os.path.join(data_folder, "cycle{}".format(cycle)),
                           transform=transform)
@@ -88,8 +102,8 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
 
 
     elif dataset == "tinyimagenet":
-        for prompt in labels:
-            prompt = prompt.split(", ")
+        for id in labels:
+            prompt = labels[id].split(", ")
             transformed_prompt = ["A photo of a " + prompt[0]]
             for word in prompt[1:]:
                 transformed_prompt.append("or a " + word)
@@ -116,7 +130,7 @@ def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,ep
         # alpha = config["emb_alpha"]
         # epsilon = config["emb_l2_epsilon"]
         for i in range(update_step):
-            embeddings_grad = diffuser.compute_gradient(model=model, prompt_embeds=embeddings,num_inference_steps=50, AL_function=AL_function,num_images_per_prompt=imgnum_per_prompt)
+            embeddings_grad = diffuser.compute_gradient(dataset_name=dataset_name, model=model, prompt_embeds=embeddings,num_inference_steps=50, AL_function=AL_function,num_images_per_prompt=imgnum_per_prompt)
             embeddings_grad = embeddings_grad.view(-1,imgnum_per_prompt,embeddings_grad.shape[1],embeddings_grad.shape[2]).mean(dim=1)
             batchsize=embeddings_grad.shape[0]
             grad_norms = torch.norm(embeddings_grad.view(batchsize, -1), p=2, dim=1) +1e-8  # nopep8
@@ -134,8 +148,11 @@ def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,ep
 
     return embeddings_list_updated
 
-def max_entropy(image, model):
-    image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
+def max_entropy(dataset_name, image, model):
+    if dataset_name == 'cifar10' or dataset_name == 'cifar100':
+        image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
+    elif dataset_name == 'tinyimagenet':
+        image = F.interpolate(image, size=(64, 64), mode='bilinear', align_corners=False).float()
     probs,_ = model(image)
     probs_sorted, idxs = probs.sort(descending=True)
     uncertainties = torch.sum(probs_sorted[:, 0] - probs_sorted[:, 1])
@@ -161,7 +178,9 @@ def dataset_sampling(diffuser,sample_per_class,sample_per_prompt,embedding_list_
         os.mkdir(epoch_folder)
 
     for idx, embedding in enumerate(embedding_list_updated):
-        label = labels[idx]
+        label_list = list(labels.keys())
+        # label_list.sort()
+        label = label_list[idx]
         class_folder = os.path.join(epoch_folder, label)
         if not os.path.exists(class_folder):
             os.mkdir(class_folder)
