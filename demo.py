@@ -102,12 +102,13 @@ while (iteration > 0):
 		strategy.train(model_name = args_input.ALstrategy)
 	else:
 		strategy.train()
-		# strategy.GAL_train(cycle=0)
+		strategy.GAL_train(cycle=0)
+
 	preds = strategy.predict(dataset.get_test_data())
 	acc[0] = dataset.cal_test_acc(preds)
 	print('Round 0\ntesting accuracy {}'.format(acc[0]))
 	print('\n')
-	
+
 	# round 1 to rd
 	for rd in range(1, NUM_ROUND+1):
 		print('Round {}'.format(rd))
@@ -118,7 +119,7 @@ while (iteration > 0):
 			q_idxs, new_data = strategy.query(NUM_QUERY, rd, option = args_input.ALstrategy[13:])
 		else:
 			q_idxs = strategy.query(NUM_QUERY)
-	
+
 		# update
 		strategy.update(q_idxs)
 
@@ -129,8 +130,8 @@ while (iteration > 0):
 			strategy.train(model_name = args_input.ALstrategy)
 		else:
 			strategy.train()
-			# strategy.GAL_train(cycle=rd+1)
-	
+			strategy.GAL_train(cycle=rd+1)
+
 		# round rd accuracy
 		preds = strategy.predict(dataset.get_test_data())
 		acc[rd] = dataset.cal_test_acc(preds)
@@ -138,20 +139,20 @@ while (iteration > 0):
 		print('\n')
 
 		#torch.cuda.empty_cache()
-	
+
 	# print results
 	print('SEED {}'.format(SEED))
 	print(type(strategy).__name__)
 	print(acc)
 	all_acc.append(acc)
-	
+
 	#save model
 	timestamp = re.sub('\.[0-9]*','_',str(datetime.datetime.now())).replace(" ", "_").replace("-", "").replace(":","")
 	model_path = './modelpara/'+timestamp + DATA_NAME+ '_'  + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) +  '_' + str(args_input.quota)  +'.params'
 	end = datetime.datetime.now()
 	acq_time.append(round(float((end-start).seconds),3))
 	torch.save(strategy.get_model().state_dict(), model_path)
-	
+
 # cal mean & standard deviation
 acc_m = []
 file_name_res_tot = DATA_NAME+ '_'  + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) +  '_' + str(args_input.quota) + '_normal_res_tot.txt'
