@@ -175,7 +175,7 @@ def current_model_sample_score(model,image,device):
     score=max_entropy(image_tensor, model)
     return score
 
-def dataset_sampling(diffuser,sample_per_class,sample_per_prompt,embedding_list_updated,labels,cycle,data_folder):
+def dataset_sampling(diffuser,sample_per_class,sample_per_prompt,embedding_list_updated,labels,cycle,data_folder,dataset_name):
 
     if not os.path.exists(data_folder):
         os.makedirs(data_folder)
@@ -184,9 +184,12 @@ def dataset_sampling(diffuser,sample_per_class,sample_per_prompt,embedding_list_
         os.mkdir(epoch_folder)
 
     for idx, embedding in enumerate(embedding_list_updated):
-        label_list = list(labels.keys())
-        # label_list.sort()
-        label = label_list[idx]
+        if dataset_name == 'tinyimagenet':
+            label_list = list(labels.keys())
+            # label_list.sort()
+            label = label_list[idx]
+        else:
+            label = labels[idx]
         class_folder = os.path.join(epoch_folder, label)
         if not os.path.exists(class_folder):
             os.mkdir(class_folder)
