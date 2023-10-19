@@ -122,6 +122,7 @@ def get_TinyImageNet(handler, args_task):
     with open('./data/TinyImageNet/tiny-imagenet-200/wnids.txt') as wnid:
         for line in wnid:
             Y_train_t.append(line.strip('\n'))
+        Y_train_t.sort()
     for Y in Y_train_t:
         Y_path = './data/TinyImageNet/tiny-imagenet-200/train/' + Y + '/' + Y + '_boxes.txt'
         train_img_name = []
