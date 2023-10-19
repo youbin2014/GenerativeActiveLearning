@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
+import json
 from GAL import update_embedding_reverse,max_entropy,dataset_sampling,update_train_loader
 import os
 class Strategy:
@@ -50,23 +51,33 @@ class Strategy:
             if data == None:
                 labeled_idxs, labeled_data = self.dataset.get_labeled_data()
                 dataset_name=self.args_task['name'].lower()
-                labels=self.args_task['labels']
-                epsilons = self.args_task['epsilon']
-                alphas = self.args_task['alpha']
+                if dataset_name == 'cifar100':
+                    with open('/home/shy23010/GenerativeActiveLearning/cifar-100-labels.json', 'r') as file:
+                        labels = json.load(file)
+                elif dataset_name == 'tinyimagenet':
+                    with open('/home/shy23010/GenerativeActiveLearning/tiny_imagenet_labels.json', 'r') as file:
+                        labels = json.load(file)
+                else:
+                    labels = self.args_task['labels']
+
+                # epsilons = self.args_task['epsilon']
+                # alphas = self.args_task['alpha']
+                epsilons = self.args_task['epsilon'] / 11 * (cycle + 1)
+                alphas = epsilons / 5
                 model=self.net.get_model()
                 emb_num_per_prompt=self.args_task['emb_num_per_prompt']
                 update_step=self.args_task['emb_update_step']
                 samp_num_per_prompt=self.args_task['samp_num_per_prompt']
                 # samp_num_per_class=self.args_task['samp_num_per_class']
-                samp_num_per_class=int(len(labeled_idxs)/len(labels))
-                data_folder = '/home/hah22011/projects/deepALplus/generated_data/{}{}'.format(dataset_name,self.args_task['data_folder'])
+                samp_num_per_class=int(len(labeled_idxs)/len(labels)) ## for sample numbers
+                data_folder = '/home/shy23010/GenerativeActiveLearning/generated_data/{}/{}'.format(dataset_name,self.args_task['data_folder'])
                 if not os.path.exists(data_folder):
-                    os.mkdir(data_folder)
+                    os.makedirs(data_folder)
                 embedding_list_updated = update_embedding_reverse(emb_num_per_prompt,update_step,dataset_name, alphas, epsilons, labels, model,
                                                                   self.diffuser, self.device, max_entropy)
                 dataset_sampling(self.diffuser, samp_num_per_class,samp_num_per_prompt, embedding_list_updated, labels, cycle,
                                  data_folder)
-                labeled_data = update_train_loader(data_folder, labeled_data, cycle)
+                labeled_data = update_train_loader(data_folder, labeled_data, cycle, dataset_name)
                 self.net.train(labeled_data)
             else:
                 self.net.train(data)

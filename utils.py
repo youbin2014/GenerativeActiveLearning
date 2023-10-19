@@ -2,7 +2,7 @@ from torchvision import transforms
 from handlers import MNIST_Handler, SVHN_Handler, CIFAR10_Handler, openml_Handler, MNIST_Handler_joint, SVHN_Handler_joint, CIFAR10_Handler_joint
 from data import get_MNIST, get_FashionMNIST, get_EMNIST, get_SVHN, get_CIFAR10, get_CIFAR10_imb, get_CIFAR100,  \
 								get_TinyImageNet, get_openml, get_BreakHis, get_PneumoniaMNIST, get_waterbirds
-from nets import Net, MNIST_Net, CIFAR10_Net, openml_Net, PneumoniaMNIST_Net, waterbirds_Net, get_net_vae
+from nets import Net, MNIST_Net, CIFAR10_Net, CIFAR100_Net, CIFAR200_Net, openml_Net, PneumoniaMNIST_Net, waterbirds_Net, get_net_vae
 from nets_lossprediction import Net_LPL, MNIST_Net_LPL, CIFAR10_Net_LPL, PneumoniaMNIST_Net_LPL, waterbirds_Net_LPL, get_lossnet
 from nets_waal import Net_WAAL, MNIST_Net_WAAL, CIFAR10_Net_WAAL, waterbirds_Net_WAAL, CLF_WAAL, Discriminator
 from query_strategies import RandomSampling, LeastConfidence, MarginSampling, EntropySampling, \
@@ -135,9 +135,9 @@ def get_net(name, args_task, device):
 	elif name == 'CIFAR10_imb':
 		return Net(CIFAR10_Net, args_task, device)
 	elif name == 'CIFAR100':
-		return Net(CIFAR10_Net, args_task, device)
+		return Net(CIFAR100_Net, args_task, device)
 	elif name == 'TinyImageNet':
-		return Net(CIFAR10_Net, args_task, device)
+		return Net(CIFAR200_Net, args_task, device)
 	elif name == 'openml':
 		return Net(openml_Net, args_task, device)
 	elif name == 'BreakHis':

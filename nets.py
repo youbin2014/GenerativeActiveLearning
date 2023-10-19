@@ -177,7 +177,7 @@ class CIFAR10_Net(nn.Module):
         # self.features = nn.Sequential(*list(features_tmp))
         # self.classifier = nn.Linear(512, num_classes)
         # self.dim = resnet18.fc.in_features
-        self.resnet18=ResNet18()
+        self.resnet18=ResNet18(num_classes=num_classes)
 
 
 
@@ -191,6 +191,65 @@ class CIFAR10_Net(nn.Module):
 
     def get_embedding_dim(self):
         return self.dim
+
+
+class CIFAR100_Net(nn.Module):
+    def __init__(self, dim=28 * 28, pretrained=False, num_classes=10):
+        super().__init__()
+        from arch.resnet import ResNet18
+        # resnet18 = models.resnet18(pretrained=pretrained)
+        # features_tmp = nn.Sequential(*list(resnet18.children())[:-1])
+        # features_tmp[0] = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        # self.features = nn.Sequential(*list(features_tmp))
+        # self.classifier = nn.Linear(512, num_classes)
+        # self.dim = resnet18.fc.in_features
+        self.resnet18=ResNet18(num_classes=100)
+
+
+
+
+    def forward(self, x):
+        # feature = self.features(x)
+        # x = feature.view(feature.size(0), -1)
+        # output = self.classifier(x)
+        output=self.resnet18(x)
+        return output, x
+
+    def get_embedding_dim(self):
+        return self.dim
+
+class CIFAR200_Net(nn.Module):
+    def __init__(self, dim=28 * 28, pretrained=False, num_classes=10):
+        super().__init__()
+        from arch.resnet import ResNet18
+        # resnet18 = models.resnet18(pretrained=pretrained)
+        # features_tmp = nn.Sequential(*list(resnet18.children())[:-1])
+        # features_tmp[0] = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        # self.features = nn.Sequential(*list(features_tmp))
+        # self.classifier = nn.Linear(512, num_classes)
+        # self.dim = resnet18.fc.in_features
+
+        # self.resnet18=ResNet18(num_classes=200)
+
+        # Load Resnet18 with pretrained weights
+        self.model_ft = models.resnet18(pretrained=True)
+        # Finetune Final few layers to adjust for tiny imagenet input
+        self.model_ft.avgpool = nn.AdaptiveAvgPool2d(1)
+        num_ftrs = self.model_ft.fc.in_features
+        self.model_ft.fc = nn.Linear(num_ftrs, 200)
+
+
+    def forward(self, x):
+        # feature = self.features(x)
+        # x = feature.view(feature.size(0), -1)
+        # output = self.classifier(x)
+        # output=self.resnet18(x)
+        output = self.model_ft(x)
+        return output, x
+
+    def get_embedding_dim(self):
+        return self.dim
+
 
 
 class openml_Net(nn.Module):
