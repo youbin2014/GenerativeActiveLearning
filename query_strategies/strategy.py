@@ -76,7 +76,7 @@ class Strategy:
                 embedding_list_updated = update_embedding_reverse(emb_num_per_prompt,update_step,dataset_name, alphas, epsilons, labels, model,
                                                                   self.diffuser, self.device, max_entropy)
                 dataset_sampling(self.diffuser, samp_num_per_class,samp_num_per_prompt, embedding_list_updated, labels, cycle,
-                                 data_folder)
+                                 data_folder, dataset_name)
                 labeled_data = update_train_loader(data_folder, labeled_data, cycle, dataset_name)
                 self.net.train(labeled_data)
             else:
