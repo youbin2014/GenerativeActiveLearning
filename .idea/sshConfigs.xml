@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig host="192.5.87.113" id="363db4f2-0ce8-4e42-8d9b-5ea32dd3dc3c" keyPath="C:\Users\User\.ssh\mychameleonkey.pem" port="22" nameFormat="DESCRIPTIVE" username="cc" useOpenSSHConfig="true" />
+    </configs>
+  </component>
+</project>
