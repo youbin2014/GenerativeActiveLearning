@@ -46,7 +46,7 @@ device = torch.device("cuda:{}".format(args_input.gpu) if use_cuda else "cpu")
 print(device)
 
 #recording
-sys.stdout = Logger(os.path.abspath('') + '/logfile/' + DATA_NAME+ '_'  + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) +  '_' + str(args_input.quota) + '_'+str(args_task.data_folder)+'_log.txt')
+sys.stdout = Logger(os.path.abspath('') + '/logfile/' + DATA_NAME+ '_'  + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) +  '_' + str(args_input.quota) + '_'+str(args_task['data_folder'])+'_log.txt')
 warnings.filterwarnings('ignore')
 
 # start experiment
