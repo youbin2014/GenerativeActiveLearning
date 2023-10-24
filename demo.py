@@ -102,7 +102,7 @@ while (iteration > 0):
 		strategy.train(model_name = args_input.ALstrategy)
 	else:
 		strategy.train()
-		strategy.GAL_train(cycle=0)
+		strategy.GAL_train(cycle=0,iter=iteration)
 
 	preds = strategy.predict(dataset.get_test_data())
 	acc[0] = dataset.cal_test_acc(preds)
@@ -130,7 +130,7 @@ while (iteration > 0):
 			strategy.train(model_name = args_input.ALstrategy)
 		else:
 			strategy.train()
-			strategy.GAL_train(cycle=rd+1)
+			strategy.GAL_train(cycle=rd+1,iter=iteration)
 
 		# round rd accuracy
 		preds = strategy.predict(dataset.get_test_data())

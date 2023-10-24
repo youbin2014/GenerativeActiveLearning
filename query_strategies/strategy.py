@@ -46,7 +46,7 @@ class Strategy:
             else:
                 raise NotImplementedError
 
-    def GAL_train(self, data = None, model_name = None,cycle=None):
+    def GAL_train(self, data = None, model_name = None,cycle=None,iter=None):
         if model_name == None:
             if data == None:
                 labeled_idxs, labeled_data = self.dataset.get_labeled_data()
