@@ -47,15 +47,17 @@ class Strategy:
                 raise NotImplementedError
 
     def GAL_train(self, data = None, model_name = None,cycle=None,iter=None):
+        # Get the current working directory
+        current_directory = os.getcwd()
         if model_name == None:
             if data == None:
                 labeled_idxs, labeled_data = self.dataset.get_labeled_data()
                 dataset_name=self.args_task['name'].lower()
                 if dataset_name == 'cifar100':
-                    with open('/home/shy23010/GenerativeActiveLearning/cifar-100-labels.json', 'r') as file:
+                    with open('./cifar-100-labels.json', 'r') as file:
                         labels = json.load(file)
                 elif dataset_name == 'tinyimagenet':
-                    with open('/home/shy23010/GenerativeActiveLearning/tiny_imagenet_labels.json', 'r') as file:
+                    with open('./tiny_imagenet_labels.json', 'r') as file:
                         labels = json.load(file)
                 else:
                     labels = self.args_task['labels']
@@ -70,7 +72,7 @@ class Strategy:
                 samp_num_per_prompt=self.args_task['samp_num_per_prompt']
                 # samp_num_per_class=self.args_task['samp_num_per_class']
                 samp_num_per_class=int(len(labeled_idxs)/len(labels)) ## for sample numbers
-                data_folder = '/home/shy23010/GenerativeActiveLearning/generated_data/{}/{}_{}'.format(dataset_name,self.args_task['data_folder'],iter)
+                data_folder = './generated_data/{}/{}_{}'.format(dataset_name,self.args_task['data_folder'],iter)
                 if not os.path.exists(data_folder):
                     os.makedirs(data_folder)
                 embedding_list_updated = update_embedding_reverse(emb_num_per_prompt,update_step,dataset_name, alphas, epsilons, labels, model,
