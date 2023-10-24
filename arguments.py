@@ -16,7 +16,7 @@ def get_args():
 	parser.add_argument('--quota', '-q', default=4000, type=int, help='quota of active learning')
 	parser.add_argument('--batch', '-b', default=1000, type=int, help='batch size in one active learning iteration')
 	parser.add_argument('--dataset_name', '-d', default='CIFAR10', type=str, help='dataset name')
-	parser.add_argument('--iteration', '-t', default=3, type=int, help='time of repeat the experiment')
+	parser.add_argument('--iteration', '-t', default=1, type=int, help='time of repeat the experiment')
 	parser.add_argument('--data_path', type=str, default='./../data', help='Path to where the data is')
 	parser.add_argument('--out_path', type=str, default='./../results', help='Path to where the output log will be')
 	parser.add_argument('--log_name', type=str, default='test.log', help='middle outputs')
@@ -24,7 +24,7 @@ def get_args():
 	parser.add_argument('--cuda', action='store_true', help='If training is to be done on a GPU')
 	#parser.add_argument('--model', '-m', default='ResNet18', type=str, help='model name')
 	parser.add_argument('--initseed', '-s', default = 1000, type = int, help = 'Initial pool of labeled data')
-	parser.add_argument('--gpu', '-g', default = '0', type = str, help = 'which gpu')
+	parser.add_argument('--gpu', '-g', default = '1', type = str, help = 'which gpu')
 	parser.add_argument('--seed', default=4666, type=int, help='random seed')
 	
 	# lpl
