@@ -28,7 +28,7 @@ NUM_INIT_LB = args_input.initseed
 NUM_ROUND = int(args_input.quota / args_input.batch)
 DATA_NAME = args_input.dataset_name
 STRATEGY_NAME = args_input.ALstrategy
-
+args_task = args_pool[DATA_NAME]
 
 SEED = args_input.seed
 os.environ['TORCH_HOME']='./basicmodel'
@@ -46,7 +46,7 @@ device = torch.device("cuda:{}".format(args_input.gpu) if use_cuda else "cpu")
 print(device)
 
 #recording
-sys.stdout = Logger(os.path.abspath('') + '/logfile/' + DATA_NAME+ '_'  + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) +  '_' + str(args_input.quota) + '_normal_log.txt')
+sys.stdout = Logger(os.path.abspath('') + '/logfile/' + DATA_NAME+ '_'  + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) +  '_' + str(args_input.quota) + '_'+str(args_task.data_folder)+'_log.txt')
 warnings.filterwarnings('ignore')
 
 # start experiment
