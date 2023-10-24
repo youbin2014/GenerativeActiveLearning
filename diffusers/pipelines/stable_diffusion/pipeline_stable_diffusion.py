@@ -542,7 +542,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
         return latents
 
     def compute_gradient(self,
-        dataset_name: str,
+        dataset_name: str =None,
         prompt: Union[str, List[str]] = None,
         model:torch.nn.Module =None,
         AL_function: Callable =None,
