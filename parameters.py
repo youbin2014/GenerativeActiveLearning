@@ -80,7 +80,7 @@ args_pool = {'MNIST':
              'CIFAR10':
                  {'n_epoch': 300,
                   'name': 'CIFAR10',
-                  'data_folder':'RS_epsilon_5_1xgen',
+                  'data_folder':'Text_template_1',
                   'transform_train': transforms.Compose([transforms.RandomCrop(size=32, padding=4),
                                                          transforms.RandomHorizontalFlip(),
                                                          transforms.ToTensor(),
@@ -97,10 +97,10 @@ args_pool = {'MNIST':
                   'optimizer_args': {'lr': 0.01,'momentum':0.9,'weight_decay':5e-4},
                   'scheduler': 'CosineAnnealingLR',
                   'labels': ["Airplane", "Automobile", "Bird", "Cat", "Deer", "Dog", "Frog", "Horse", "Ship", "Truck"],
-                  'epsilon':5,
+                  'epsilon':1,
                   'emb_update_step':10,
                   'alpha':1,
-                  'emb_num_per_prompt': 6,
+                  'emb_num_per_prompt': 8,
                   'samp_num_per_prompt': 32,
                   'samp_num_per_class': 100
                     },
