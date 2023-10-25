@@ -100,7 +100,7 @@ args_pool = {'MNIST':
                   'epsilon':1,
                   'emb_update_step':10,
                   'alpha':1,
-                  'emb_num_per_prompt': 8,
+                  'emb_num_per_prompt': 7,
                   'samp_num_per_prompt': 32,
                   'samp_num_per_class': 100
                     },
