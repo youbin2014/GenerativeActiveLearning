@@ -64,7 +64,8 @@ class Strategy:
 
                 # epsilons = self.args_task['epsilon']
                 # alphas = self.args_task['alpha']
-                epsilons = self.args_task['epsilon'] / 11 * (cycle + 1)
+                total_cycle=(self.args_input.quota+self.args_input.initseed)/self.args_input.batch
+                epsilons = self.args_task['epsilon'] / total_cycle * (cycle + 1) #linear epsilon
                 alphas = epsilons / 5
                 model=self.net.get_model()
                 emb_num_per_prompt=self.args_task['emb_num_per_prompt']
@@ -72,7 +73,7 @@ class Strategy:
                 samp_num_per_prompt=self.args_task['samp_num_per_prompt']
                 # samp_num_per_class=self.args_task['samp_num_per_class']
                 samp_num_per_class=int(len(labeled_idxs)/len(labels)) ## for sample numbers
-                data_folder = './generated_data/{}/{}_{}'.format(dataset_name,self.args_task['data_folder'],iter)
+                data_folder = './generated_data/{}_{}_iter{}'.format(dataset_name,self.args_task['data_folder'],iter)
                 if not os.path.exists(data_folder):
                     os.makedirs(data_folder)
                 embedding_list_updated = update_embedding_reverse(emb_num_per_prompt,update_step,dataset_name, alphas, epsilons, labels, model,
