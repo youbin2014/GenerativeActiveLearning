@@ -141,7 +141,7 @@ def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,ep
             batchsize=embeddings_grad.shape[0]
             grad_norms = torch.norm(embeddings_grad.view(batchsize, -1), p=2, dim=1) +1e-8  # nopep8
             embeddings_grad = embeddings_grad / grad_norms.view(batchsize, 1, 1)
-            embeddings = embeddings.detach() - alpha * embeddings_grad
+            embeddings = embeddings.detach() + alpha * embeddings_grad
 
             delta = embeddings - embeddings_original
             delta_norms = torch.norm(delta.view(batchsize, -1), p=2, dim=1)
@@ -154,7 +154,7 @@ def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,ep
 
     return embeddings_list_updated
 
-def max_entropy(dataset_name, image, model):
+def margin(dataset_name, image, model):
     if dataset_name == 'cifar10' or dataset_name == 'cifar100':
         image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
     elif dataset_name == 'tinyimagenet':
@@ -164,16 +164,34 @@ def max_entropy(dataset_name, image, model):
     uncertainties = torch.sum(probs_sorted[:, 0] - probs_sorted[:, 1])
     return uncertainties
 
+def entropy(dataset_name, image, model):
+    if dataset_name == 'cifar10' or dataset_name == 'cifar100':
+        image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
+    elif dataset_name == 'tinyimagenet':
+        image = F.interpolate(image, size=(64, 64), mode='bilinear', align_corners=False).float()
+    probs,_ = model(image)
+    log_probs = torch.log(probs)
+    uncertainties = (probs * log_probs).sum(1)
+    return uncertainties
 
-def current_model_sample_score(model,image,device):
-    model.eval()
-    transform = transforms.Compose([
-        transforms.Resize((32, 32)),  # This size might vary depending on the model
-        transforms.ToTensor()
-    ])
-    image_tensor = transform(image).unsqueeze(0).to(device)  # Add a batch dimension
-    score=max_entropy(image_tensor, model)
-    return score
+def least_confidence(dataset_name, image, model):
+    if dataset_name == 'cifar10' or dataset_name == 'cifar100':
+        image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
+    elif dataset_name == 'tinyimagenet':
+        image = F.interpolate(image, size=(64, 64), mode='bilinear', align_corners=False).float()
+    probs,_ = model(image)
+    uncertainties = probs.max(1)[0]
+    return uncertainties
+
+# def current_model_sample_score(model,image,device):
+#     model.eval()
+#     transform = transforms.Compose([
+#         transforms.Resize((32, 32)),  # This size might vary depending on the model
+#         transforms.ToTensor()
+#     ])
+#     image_tensor = transform(image).unsqueeze(0).to(device)  # Add a batch dimension
+#     score=max_entropy(image_tensor, model)
+#     return score
 
 def dataset_sampling(diffuser,sample_per_class,sample_per_prompt,embedding_list_updated,labels,cycle,data_folder,dataset_name):
 

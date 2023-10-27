@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import json
-from GAL import update_embedding_reverse,max_entropy,dataset_sampling,update_train_loader
+from GAL import update_embedding_reverse,entropy,dataset_sampling,update_train_loader
 import os
 class Strategy:
     def __init__(self, dataset, net, args_input, args_task,diffuser=None):
@@ -66,6 +66,7 @@ class Strategy:
                 # alphas = self.args_task['alpha']
                 total_cycle=(self.args_input.quota+self.args_input.initseed)/self.args_input.batch
                 epsilons = self.args_task['epsilon'] / total_cycle * (cycle + 1) #linear epsilon
+                print("epsilon=",epsilons)
                 alphas = epsilons / 5
                 model=self.net.get_model()
                 emb_num_per_prompt=self.args_task['emb_num_per_prompt']
@@ -77,7 +78,7 @@ class Strategy:
                 if not os.path.exists(data_folder):
                     os.makedirs(data_folder)
                 embedding_list_updated = update_embedding_reverse(emb_num_per_prompt,update_step,dataset_name, alphas, epsilons, labels, model,
-                                                                  self.diffuser, self.device, max_entropy)
+                                                                  self.diffuser, self.device, entropy)
                 dataset_sampling(self.diffuser, samp_num_per_class,samp_num_per_prompt, embedding_list_updated, labels, cycle,
                                  data_folder, dataset_name)
                 labeled_data = update_train_loader(data_folder, labeled_data, cycle, dataset_name)
