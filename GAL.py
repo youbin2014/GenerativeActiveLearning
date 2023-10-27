@@ -173,7 +173,7 @@ def entropy(dataset_name, image, model):
     probs,_ = model(image)
     log_probs = torch.log(probs)
     uncertainties = (probs * log_probs).sum(1)
-    return uncertainties
+    return uncertainties.sum()
 
 def least_confidence(dataset_name, image, model):
     if dataset_name == 'cifar10' or dataset_name == 'cifar100':
@@ -182,7 +182,7 @@ def least_confidence(dataset_name, image, model):
         image = F.interpolate(image, size=(64, 64), mode='bilinear', align_corners=False).float()
     probs,_ = model(image)
     uncertainties = probs.max(1)[0]
-    return uncertainties
+    return uncertainties.sum()
 
 # def current_model_sample_score(model,image,device):
 #     model.eval()
