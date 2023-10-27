@@ -98,7 +98,7 @@ args_pool = {'MNIST':
                   'scheduler': 'CosineAnnealingLR',
                   'labels': ["Airplane", "Automobile", "Bird", "Cat", "Deer", "Dog", "Frog", "Horse", "Ship", "Truck"],
                   'epsilon':0.5,
-                  'emb_update_step':10,
+                  'emb_update_step':1,
                   'alpha':1,
                   'emb_num_per_prompt': 6,
                   'samp_num_per_prompt': 32,
