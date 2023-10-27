@@ -130,7 +130,7 @@ while (iteration > 0):
 			strategy.train(model_name = args_input.ALstrategy)
 		else:
 			strategy.train()
-			strategy.GAL_train(cycle=rd+1,iter=iteration)
+			strategy.GAL_train(cycle=rd,iter=iteration)
 
 		# round rd accuracy
 		preds = strategy.predict(dataset.get_test_data())

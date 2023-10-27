@@ -156,6 +156,7 @@ def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,ep
     return embeddings_list_updated
 
 def margin(dataset_name, image, model):
+    '''maximize the margin'''
     if dataset_name == 'cifar10' or dataset_name == 'cifar100':
         image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
     elif dataset_name == 'tinyimagenet':
@@ -166,6 +167,7 @@ def margin(dataset_name, image, model):
     return uncertainties
 
 def entropy(dataset_name, image, model):
+    '''minmize entropy'''
     if dataset_name == 'cifar10' or dataset_name == 'cifar100':
         image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
     elif dataset_name == 'tinyimagenet':
@@ -176,6 +178,7 @@ def entropy(dataset_name, image, model):
     return uncertainties.sum()
 
 def least_confidence(dataset_name, image, model):
+    '''maximize top 1 confidence'''
     if dataset_name == 'cifar10' or dataset_name == 'cifar100':
         image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
     elif dataset_name == 'tinyimagenet':
