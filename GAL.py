@@ -135,21 +135,22 @@ def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,ep
         embeddings_original = embeddings.clone()
         # alpha = config["emb_alpha"]
         # epsilon = config["emb_l2_epsilon"]
-        for i in range(update_step):
-            embeddings_grad = diffuser.compute_gradient(dataset_name=dataset_name, model=model, prompt_embeds=embeddings,num_inference_steps=50, AL_function=AL_function,num_images_per_prompt=imgnum_per_prompt)
-            embeddings_grad = embeddings_grad.view(-1,imgnum_per_prompt,embeddings_grad.shape[1],embeddings_grad.shape[2]).mean(dim=1)
-            batchsize=embeddings_grad.shape[0]
-            grad_norms = torch.norm(embeddings_grad.view(batchsize, -1), p=2, dim=1) +1e-8  # nopep8
-            embeddings_grad = embeddings_grad / grad_norms.view(batchsize, 1, 1)
-            embeddings = embeddings.detach() + alpha * embeddings_grad
+        if update_step>0:
+            for i in range(update_step):
+                embeddings_grad = diffuser.compute_gradient(dataset_name=dataset_name, model=model, prompt_embeds=embeddings,num_inference_steps=50, AL_function=AL_function,num_images_per_prompt=imgnum_per_prompt)
+                embeddings_grad = embeddings_grad.view(-1,imgnum_per_prompt,embeddings_grad.shape[1],embeddings_grad.shape[2]).mean(dim=1)
+                batchsize=embeddings_grad.shape[0]
+                grad_norms = torch.norm(embeddings_grad.view(batchsize, -1), p=2, dim=1) +1e-8  # nopep8
+                embeddings_grad = embeddings_grad / grad_norms.view(batchsize, 1, 1)
+                embeddings = embeddings.detach() + alpha * embeddings_grad
 
-            delta = embeddings - embeddings_original
-            delta_norms = torch.norm(delta.view(batchsize, -1), p=2, dim=1)
-            factor = epsilon / delta_norms
-            factor = torch.min(factor, torch.ones_like(delta_norms))
-            delta = delta * factor.view(-1, 1, 1)
+                delta = embeddings - embeddings_original
+                delta_norms = torch.norm(delta.view(batchsize, -1), p=2, dim=1)
+                factor = epsilon / delta_norms
+                factor = torch.min(factor, torch.ones_like(delta_norms))
+                delta = delta * factor.view(-1, 1, 1)
+                embeddings = (embeddings_original + delta).detach()
 
-            embeddings = (embeddings_original + delta).detach()
         embeddings_list_updated.append(embeddings)
 
     return embeddings_list_updated
