@@ -545,6 +545,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
         dataset_name: str =None,
         prompt: Union[str, List[str]] = None,
         model:torch.nn.Module =None,
+        label: Optional[int] =None,
         AL_function: Callable =None,
         height: Optional[int] = None,
         width: Optional[int] = None,
@@ -706,7 +707,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
         else:
             image = latents
             has_nsfw_concept = None
-        AL_target=AL_function(dataset_name,image,model)
+        AL_target=AL_function(dataset_name,image,model,label=label)
 
         grad = torch.autograd.grad(AL_target, prompt_embeds,
                                    retain_graph=False, create_graph=False)[0]
