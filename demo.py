@@ -101,7 +101,7 @@ while (iteration > 0):
 	if args_input.ALstrategy == 'WAAL':
 		strategy.train(model_name = args_input.ALstrategy)
 	else:
-		strategy.train()
+		# strategy.train()
 		strategy.GAL_train(cycle=0,iter=iteration)
 
 	preds = strategy.predict(dataset.get_test_data())
@@ -129,7 +129,7 @@ while (iteration > 0):
 		elif args_input.ALstrategy == 'WAAL':
 			strategy.train(model_name = args_input.ALstrategy)
 		else:
-			strategy.train()
+			# strategy.train()
 			strategy.GAL_train(cycle=rd,iter=iteration)
 
 		# round rd accuracy

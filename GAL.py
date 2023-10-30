@@ -62,14 +62,16 @@ def update_train_loader(data_folder,train_subset,cycle,dataset_name):
     labeled_dataset = ImageFolder(root=os.path.join(data_folder, "cycle{}".format(cycle)),
                           transform=transform)
     dataset=CombinedDataset(train_subset, labeled_dataset)
+    # dataset = CombinedDataset([], labeled_dataset)
     # train_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True,
     #                                            num_workers=4, pin_memory=True)
     return dataset
 def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
     embeddings = []
+    label_index=[]
     if dataset == "cifar10":
         # labels = ["Airplane"]
-        for prompt in labels:
+        for idx,prompt in enumerate(labels):
             if prompt=="Automobile":
                 prompt="Car"
             prompt='a photo of a ' + prompt
@@ -80,6 +82,8 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
                 do_classifier_free_guidance=True,
             )
             embeddings.append(prompt_embeds)
+            label_index.append(idx)
+
 
     elif dataset == "svhn":
         for prompt in labels:
@@ -124,20 +128,21 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
             embeddings.append(prompt_embeds)
 
     # return torch.cat(embeddings,dim=0)
-    return embeddings
+    return embeddings,label_index
 def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,epsilon,labels,model,diffuser,device,AL_function):
 
-    embeddings_list = embedding_prepare(dataset_name,labels, diffuser,imgnum_per_prompt, device)
+    embeddings_list,label_index = embedding_prepare(dataset_name,labels, diffuser,imgnum_per_prompt, device)
     embeddings_list_updated=[]
     print("updating embeddings")
-    for embeddings in embeddings_list:
+    for idx,embeddings in enumerate(embeddings_list):
+        label=label_index[idx]
         embeddings=embeddings.view(-1,imgnum_per_prompt,embeddings.shape[1],embeddings.shape[2]).mean(dim=1)
         embeddings_original = embeddings.clone()
         # alpha = config["emb_alpha"]
         # epsilon = config["emb_l2_epsilon"]
         if update_step>0:
             for i in range(update_step):
-                embeddings_grad = diffuser.compute_gradient(dataset_name=dataset_name, model=model, prompt_embeds=embeddings,num_inference_steps=50, AL_function=AL_function,num_images_per_prompt=imgnum_per_prompt)
+                embeddings_grad = diffuser.compute_gradient(dataset_name=dataset_name, model=model, prompt_embeds=embeddings,label=label,num_inference_steps=50, AL_function=AL_function,num_images_per_prompt=imgnum_per_prompt)
                 embeddings_grad = embeddings_grad.view(-1,imgnum_per_prompt,embeddings_grad.shape[1],embeddings_grad.shape[2]).mean(dim=1)
                 batchsize=embeddings_grad.shape[0]
                 grad_norms = torch.norm(embeddings_grad.view(batchsize, -1), p=2, dim=1) +1e-8  # nopep8
@@ -155,37 +160,54 @@ def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,ep
 
     return embeddings_list_updated
 
-def margin(dataset_name, image, model):
+def margin(dataset_name, image, model,label=None):
     '''maximize the margin'''
     if dataset_name == 'cifar10' or dataset_name == 'cifar100':
         image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
     elif dataset_name == 'tinyimagenet':
         image = F.interpolate(image, size=(64, 64), mode='bilinear', align_corners=False).float()
     probs,_ = model(image)
+    probs=torch.nn.functional.softmax(probs)
     probs_sorted, idxs = probs.sort(descending=True)
     uncertainties = torch.sum(probs_sorted[:, 0] - probs_sorted[:, 1])
     return uncertainties
 
-def entropy(dataset_name, image, model):
-    '''minmize entropy'''
+def entropy(dataset_name, image, model,label=None):
+    '''negative entropy'''
     if dataset_name == 'cifar10' or dataset_name == 'cifar100':
         image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
     elif dataset_name == 'tinyimagenet':
         image = F.interpolate(image, size=(64, 64), mode='bilinear', align_corners=False).float()
     probs,_ = model(image)
+    probs=torch.nn.functional.softmax(probs)
     log_probs = torch.log(probs)
     uncertainties = (probs * log_probs).sum(1)
     return uncertainties.sum()
 
-def least_confidence(dataset_name, image, model):
+def least_confidence(dataset_name, image, model,label=None):
     '''maximize top 1 confidence'''
     if dataset_name == 'cifar10' or dataset_name == 'cifar100':
         image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
     elif dataset_name == 'tinyimagenet':
         image = F.interpolate(image, size=(64, 64), mode='bilinear', align_corners=False).float()
     probs,_ = model(image)
+    probs=torch.nn.functional.softmax(probs)
     uncertainties = probs.max(1)[0]
     return uncertainties.sum()
+
+def pseudo_loss(dataset_name, image, model,label=None):
+    '''maximize top 1 confidence'''
+    pseudo_label=torch.tensor([label]).to(device=image.device)
+    if dataset_name == 'cifar10' or dataset_name == 'cifar100':
+        image = F.interpolate(image, size=(32, 32), mode='bilinear', align_corners=False).float()
+    elif dataset_name == 'tinyimagenet':
+        image = F.interpolate(image, size=(64, 64), mode='bilinear', align_corners=False).float()
+    probs,_ = model(image)
+    criterion = torch.nn.CrossEntropyLoss()
+    loss = criterion(probs, pseudo_label.repeat(probs.shape[0]))
+    print(loss)
+    return -loss
+
 
 # def current_model_sample_score(model,image,device):
 #     model.eval()

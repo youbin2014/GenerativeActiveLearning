@@ -17,14 +17,13 @@ class Net:
         self.net = net
         self.params = params
         self.device = device
-
+        self.clf = self.net(pretrained=self.params['pretrained'], num_classes=self.params['num_class']).to(self.device)
 
     def train(self, data):
         n_epoch = self.params['n_epoch']
 
-        dim = data.X.shape[1:]
-        self.clf = self.net(dim=dim, pretrained=self.params['pretrained'], num_classes=self.params['num_class']).to(
-            self.device)
+        # dim = data.X.shape[1:]
+
         self.clf.train()
         if self.params['optimizer'] == 'Adam':
             optimizer = optim.Adam(self.clf.parameters(), **self.params['optimizer_args'])
@@ -53,7 +52,7 @@ class Net:
                 loss.backward()
                 optimizer.step()
             scheduler.step()
-
+        print(loss)
     def predict(self, data):
         self.clf.eval()
 
@@ -177,11 +176,7 @@ class CIFAR10_Net(nn.Module):
         # self.features = nn.Sequential(*list(features_tmp))
         # self.classifier = nn.Linear(512, num_classes)
         # self.dim = resnet18.fc.in_features
-        self.resnet18=ResNet18(num_classes=num_classes)
-
-
-
-
+        self.resnet18=ResNet18()
     def forward(self, x):
         # feature = self.features(x)
         # x = feature.view(feature.size(0), -1)
