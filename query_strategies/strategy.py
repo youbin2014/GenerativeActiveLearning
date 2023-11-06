@@ -73,7 +73,11 @@ class Strategy:
                 update_step=self.args_task['emb_update_step']
                 samp_num_per_prompt=self.args_task['samp_num_per_prompt']
                 # samp_num_per_class=self.args_task['samp_num_per_class']
+<<<<<<< HEAD
                 samp_num_per_class=int(len(labeled_idxs)/len(labels)/2) ## for sample numbers
+=======
+                samp_num_per_class=int(len(labeled_idxs)/len(labels)) ## for sample numbers
+>>>>>>> 94bf75977c5e4215009bd78175f8f5c8d27d1523
                 data_folder = './generated_data/{}_{}_iter{}'.format(dataset_name,self.args_task['data_folder'],iter)
                 if not os.path.exists(data_folder):
                     os.makedirs(data_folder)

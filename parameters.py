@@ -80,7 +80,11 @@ args_pool = {'MNIST':
              'CIFAR10':
                  {'n_epoch': 300,
                   'name': 'CIFAR10',
+<<<<<<< HEAD
                   'data_folder':'Text_opt_method_9',
+=======
+                  'data_folder':'Baseline_Margin',
+>>>>>>> 94bf75977c5e4215009bd78175f8f5c8d27d1523
                   'transform_train': transforms.Compose([transforms.RandomCrop(size=32, padding=4),
                                                          transforms.RandomHorizontalFlip(),
                                                          transforms.ToTensor(),

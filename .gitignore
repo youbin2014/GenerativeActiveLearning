@@ -1,0 +1,6 @@
+./data
+./logfile
+./modelpara
+./__pycache__
+./results
+./.idea
