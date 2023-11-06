@@ -3,6 +3,13 @@
   <component name="PublishConfigData" autoUpload="Always" serverName="DataSec" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
+      <paths name="AL">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="DataSec">
         <serverdata>
           <mappings>
@@ -27,7 +34,7 @@
       <paths name="DataSec (4)">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/hah22011/projects/deepALplus" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

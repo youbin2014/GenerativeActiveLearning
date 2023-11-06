@@ -52,7 +52,7 @@ class Net:
                 loss.backward()
                 optimizer.step()
             scheduler.step()
-        print(loss)
+        # print(loss)
     def predict(self, data):
         self.clf.eval()
 

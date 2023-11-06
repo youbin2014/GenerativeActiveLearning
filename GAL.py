@@ -74,7 +74,7 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
         for idx,prompt in enumerate(labels):
             if prompt=="Automobile":
                 prompt="Car"
-            # prompt="a photo of a {}".format(prompt)
+            prompt="a realistic photo of a {}".format(prompt)
             prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
                 prompt=prompt,
                 device=device,
