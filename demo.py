@@ -106,8 +106,8 @@ if __name__ == '__main__':
 		if args_input.ALstrategy == 'WAAL':
 			strategy.train(model_name = args_input.ALstrategy)
 		else:
-			# strategy.train()
-			strategy.GAL_train(cycle=0,iter=iteration)
+			strategy.train()
+			# strategy.GAL_train(cycle=0,iter=iteration)
 
 		preds = strategy.predict(dataset.get_test_data())
 		acc[0] = dataset.cal_test_acc(preds)
@@ -134,8 +134,8 @@ if __name__ == '__main__':
 			elif args_input.ALstrategy == 'WAAL':
 				strategy.train(model_name = args_input.ALstrategy)
 			else:
-				# strategy.train()
-				strategy.GAL_train(cycle=rd,iter=iteration)
+				strategy.train()
+				# strategy.GAL_train(cycle=rd,iter=iteration)
 
 			# round rd accuracy
 			preds = strategy.predict(dataset.get_test_data())

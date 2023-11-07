@@ -22,7 +22,7 @@ class Net:
     def train(self, data):
         n_epoch = self.params['n_epoch']
 
-        # dim = data.X.shape[1:]
+        dim = data.X.shape[1:]
 
         self.clf.train()
         if self.params['optimizer'] == 'Adam':
@@ -175,14 +175,14 @@ class CIFAR10_Net(nn.Module):
         # features_tmp[0] = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         # self.features = nn.Sequential(*list(features_tmp))
         # self.classifier = nn.Linear(512, num_classes)
-        # self.dim = resnet18.fc.in_features
+        self.dim = 512
         self.resnet18=ResNet18()
     def forward(self, x):
         # feature = self.features(x)
         # x = feature.view(feature.size(0), -1)
         # output = self.classifier(x)
-        output=self.resnet18(x)
-        return output, x
+        output,feature=self.resnet18(x)
+        return output, feature
 
     def get_embedding_dim(self):
         return self.dim

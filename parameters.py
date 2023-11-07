@@ -80,7 +80,7 @@ args_pool = {'MNIST':
              'CIFAR10':
                  {'n_epoch': 300,
                   'name': 'CIFAR10',
-                  'data_folder':'Baseline_Margin',
+                  'data_folder':'Baseline_KMeansSamplingGPU',
                   'transform_train': transforms.Compose([transforms.RandomCrop(size=32, padding=4),
                                                          transforms.RandomHorizontalFlip(),
                                                          transforms.ToTensor(),

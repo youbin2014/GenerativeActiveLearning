@@ -8,7 +8,8 @@ import torchvision.models as models
 from torch.autograd import Variable
 from copy import deepcopy
 from tqdm import tqdm
-
+from torch.optim import lr_scheduler
+from arch.resnet import *
 # LossPredictionLoss
 def LossPredLoss(input, target, margin=1.0, reduction='mean'):
     assert len(input) % 2 == 0, 'the batch size is not even.'
@@ -43,7 +44,7 @@ class Net_LPL:
         epoch_loss = lpl_epoch
 
         dim = data.X.shape[1:]
-        self.clf = self.net(dim = dim, pretrained = self.params['pretrained'], num_classes = self.params['num_class']).to(self.device)
+        self.clf = self.net(BasicBlock, [2, 2, 2, 2], num_classes = self.params['num_class']).to(self.device)
         self.clf_lpl = self.net_lpl.to(self.device)
         #self.clf.train()
         if self.params['optimizer'] == 'Adam':
@@ -55,6 +56,16 @@ class Net_LPL:
         optimizer_lpl = optim.Adam(self.clf_lpl.parameters(), lr = 0.01)
 
         loader = DataLoader(data, shuffle=True, **self.params['loader_tr_args'])
+
+        if self.params['scheduler'] == 'OneCycleLR':
+            total_steps = n_epoch * len(loader)
+            scheduler = lr_scheduler.OneCycleLR(optimizer, max_lr=0.1, total_steps=total_steps,
+                                                pct_start=0.3, anneal_strategy='cos',
+                                                div_factor=25.0, final_div_factor=1e4,
+                                                base_momentum=0.85, max_momentum=0.95)
+        elif self.params['scheduler'] == 'CosineAnnealingLR':
+            scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=n_epoch)
+
         self.clf.train()
         self.clf_lpl.train()
         for epoch in tqdm(range(1, n_epoch+1), ncols=100):
@@ -71,6 +82,7 @@ class Net_LPL:
                     feature[1] = feature[1].detach()
                     feature[2] = feature[2].detach()
                     feature[3] = feature[3].detach()
+                # print(feature.shape)
                 pred_loss = self.clf_lpl(feature)
                 pred_loss = pred_loss.view(pred_loss.size(0))
 
@@ -80,6 +92,8 @@ class Net_LPL:
                 loss.backward()
                 optimizer.step()
                 optimizer_lpl.step()
+            scheduler.step()
+
 
     def predict(self, data):
         self.clf.eval()
@@ -174,17 +188,17 @@ class MNIST_Net_LPL(nn.Module):
 		super().__init__()
 		resnet18 = models.resnet18(pretrained=pretrained)
 		self.features = nn.Sequential(*list(resnet18.children())[:-1])
-		
+
 		self.feature0 = nn.Sequential(*list(resnet18.children())[0:3])
 		self.feature1 = nn.Sequential(*list(resnet18.children())[4])
 		self.feature2 = nn.Sequential(*list(resnet18.children())[5])
-		self.feature3 = nn.Sequential(*list(resnet18.children())[6]) 
+		self.feature3 = nn.Sequential(*list(resnet18.children())[6])
 		self.feature4 = nn.Sequential(*list(resnet18.children())[7])
 		self.feature5 = nn.Sequential(*list(resnet18.children())[8:9])
 		self.conv = nn.Conv2d(1, 3, kernel_size = 1)
 		self.classifier = nn.Linear(resnet18.fc.in_features,num_classes)
 		self.dim = resnet18.fc.in_features
-		
+
 	def forward(self, x):
 		x = self.conv(x)
 		x0 = self.feature0(x)
@@ -196,20 +210,21 @@ class MNIST_Net_LPL(nn.Module):
 		output = x5.view(x5.size(0), -1)
 		output = self.classifier(output)
 		return output, [x1,x2,x3,x4]
-	
-	
+
+
 	def get_embedding_dim(self):
 		return self.dim
 
-class CIFAR10_Net_LPL(nn.Module):
+class CIFAR10_Net_LPL_origin(nn.Module):
 	def __init__(self, dim = 28 * 28, pretrained=False, num_classes = 10):
 		super().__init__()
+
 		resnet18 = models.resnet18(pretrained=pretrained)
 		self.features = nn.Sequential(*list(resnet18.children())[:-1])
 		self.feature0 = nn.Sequential(*list(resnet18.children())[0:3])
 		self.feature1 = nn.Sequential(*list(resnet18.children())[4])
 		self.feature2 = nn.Sequential(*list(resnet18.children())[5])
-		self.feature3 = nn.Sequential(*list(resnet18.children())[6]) 
+		self.feature3 = nn.Sequential(*list(resnet18.children())[6])
 		self.feature4 = nn.Sequential(*list(resnet18.children())[7])
 		self.feature5 = nn.Sequential(*list(resnet18.children())[8:9])
 		self.classifier = nn.Linear(512, num_classes)
@@ -217,8 +232,8 @@ class CIFAR10_Net_LPL(nn.Module):
 		self.features[0] = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
 		self.dim = resnet18.fc.in_features
 
-		
-	
+
+
 	def forward(self, x):
 
 		x0 = self.feature0(x)
@@ -230,9 +245,44 @@ class CIFAR10_Net_LPL(nn.Module):
 		output = x5.view(x5.size(0), -1)
 		output = self.classifier(output)
 		return output, [x1,x2,x3,x4]
-	
+
 	def get_embedding_dim(self):
 		return self.dim
+
+class CIFAR10_Net_LPL(nn.Module):
+    def __init__(self, block, num_blocks, num_classes=10, dim=1):
+        super(CIFAR10_Net_LPL, self).__init__()
+        self.in_planes = 64
+
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
+                               stride=1, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
+        self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
+        self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
+        self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
+        self.linear = nn.Linear(512*block.expansion, num_classes)
+
+    def _make_layer(self, block, planes, num_blocks, stride):
+        strides = [stride] + [1]*(num_blocks-1)
+        layers = []
+        for stride in strides:
+            layers.append(block(self.in_planes, planes, stride))
+            self.in_planes = planes * block.expansion
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+        out = F.relu(self.bn1(self.conv1(x)))
+        out1 = self.layer1(out)
+        out2 = self.layer2(out1)
+        out3 = self.layer3(out2)
+        out4 = self.layer4(out3)
+        out = F.avg_pool2d(out4, 4)
+        out = out.view(out.size(0), -1)
+        out = self.linear(out)
+
+        return out, [out1,out2,out3,out4]
+
 
 class openml_Net(nn.Module):
     def __init__(self, dim = 28 * 28, embSize=256, pretrained=False, num_classes = 10):
@@ -259,7 +309,7 @@ class PneumoniaMNIST_Net_LPL(nn.Module):
 		self.feature0 = nn.Sequential(*list(resnet18.children())[0:3])
 		self.feature1 = nn.Sequential(*list(resnet18.children())[4])
 		self.feature2 = nn.Sequential(*list(resnet18.children())[5])
-		self.feature3 = nn.Sequential(*list(resnet18.children())[6]) 
+		self.feature3 = nn.Sequential(*list(resnet18.children())[6])
 		self.feature4 = nn.Sequential(*list(resnet18.children())[7])
 		self.feature5 = nn.Sequential(*list(resnet18.children())[8:9])
 		self.classifier = nn.Linear(512, num_classes)
@@ -267,8 +317,8 @@ class PneumoniaMNIST_Net_LPL(nn.Module):
 		self.features[0] = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)
 		self.feature0[0] = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)
 		self.dim = resnet18.fc.in_features
-	
-	
+
+
 	def forward(self, x):
 
 		x0 = self.feature0(x)
@@ -280,7 +330,7 @@ class PneumoniaMNIST_Net_LPL(nn.Module):
 		output = x5.view(x5.size(0), -1)
 		output = self.classifier(output)
 		return output, [x1,x2,x3,x4]
-	
+
 	def get_embedding_dim(self):
 		return self.dim
 
@@ -292,13 +342,13 @@ class waterbirds_Net_LPL(nn.Module):
 		self.feature0 = nn.Sequential(*list(resnet18.children())[0:3])
 		self.feature1 = nn.Sequential(*list(resnet18.children())[4])
 		self.feature2 = nn.Sequential(*list(resnet18.children())[5])
-		self.feature3 = nn.Sequential(*list(resnet18.children())[6]) 
+		self.feature3 = nn.Sequential(*list(resnet18.children())[6])
 		self.feature4 = nn.Sequential(*list(resnet18.children())[7])
 		self.feature5 = nn.Sequential(*list(resnet18.children())[8:9])
 		self.classifier = nn.Linear(resnet18.fc.in_features, num_classes)
 		self.dim = resnet18.fc.in_features
-		
-	
+
+
 	def forward(self, x):
 		x0 = self.feature0(x)
 		x1 = self.feature1(x0)
@@ -309,7 +359,7 @@ class waterbirds_Net_LPL(nn.Module):
 		output = x5.view(x5.size(0), -1)
 		output = self.classifier(output)
 		return output, [x1,x2,x3,x4]
-	
+
 	def get_embedding_dim(self):
 		return self.dim
 
@@ -318,7 +368,7 @@ def get_lossnet(name):
 	if name == 'PneumoniaMNIST':
 		return LossNet(feature_sizes=[224, 112, 56, 28], num_channels=[64, 128, 256, 512], interm_dim=128)
 	elif 'MNIST' in name:
-		return LossNet(feature_sizes=[14, 7, 4, 2], num_channels=[64, 128, 256, 512], interm_dim=128) 
+		return LossNet(feature_sizes=[14, 7, 4, 2], num_channels=[64, 128, 256, 512], interm_dim=128)
 	elif 'CIFAR' in name:
 		return LossNet(feature_sizes=[32, 16, 8, 4], num_channels=[64, 128, 256, 512], interm_dim=128)
 	elif 'ImageNet' in name:
@@ -333,11 +383,11 @@ def get_lossnet(name):
 class LossNet(nn.Module):
 	def __init__(self, feature_sizes=[28, 14, 7, 4], num_channels=[64, 128, 256, 512], interm_dim=128):
 		super(LossNet, self).__init__()
-		
-		self.GAP1 = nn.AvgPool2d(feature_sizes[0])
-		self.GAP2 = nn.AvgPool2d(feature_sizes[1])
-		self.GAP3 = nn.AvgPool2d(feature_sizes[2])
-		self.GAP4 = nn.AvgPool2d(feature_sizes[3])
+
+		self.GAP1 = nn.AdaptiveAvgPool2d((1, 1))
+		self.GAP2 = nn.AdaptiveAvgPool2d((1, 1))
+		self.GAP3 = nn.AdaptiveAvgPool2d((1, 1))
+		self.GAP4 = nn.AdaptiveAvgPool2d((1, 1))
 
 		self.FC1 = nn.Linear(num_channels[0], interm_dim)
 		self.FC2 = nn.Linear(num_channels[1], interm_dim)
@@ -345,7 +395,7 @@ class LossNet(nn.Module):
 		self.FC4 = nn.Linear(num_channels[3], interm_dim)
 
 		self.linear = nn.Linear(4 * interm_dim, 1)
-	
+
 	def forward(self, features):
 
 		out1 = self.GAP1(features[0])
