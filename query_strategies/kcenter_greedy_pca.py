@@ -5,8 +5,8 @@ from sklearn.decomposition import PCA
 from tqdm import tqdm
 
 class KCenterGreedyPCA(Strategy):
-    def __init__(self, dataset, net, args_input, args_task):
-        super(KCenterGreedyPCA, self).__init__(dataset, net, args_input, args_task)
+    def __init__(self, dataset, net, args_input, args_task, diffuser):
+        super(KCenterGreedyPCA, self).__init__(dataset, net, args_input, args_task, diffuser)
 
     def query(self, n):
         labeled_idxs, train_data = self.dataset.get_train_data()

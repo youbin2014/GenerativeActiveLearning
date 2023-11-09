@@ -3,8 +3,8 @@ import torch
 from .strategy import Strategy
 
 class EntropySamplingDropout(Strategy):
-    def __init__(self, dataset, net, args_input, args_task, n_drop=10):
-        super(EntropySamplingDropout, self).__init__(dataset, net, args_input, args_task)
+    def __init__(self, dataset, net, args_input, args_task, diffuser, n_drop=10):
+        super(EntropySamplingDropout, self).__init__(dataset, net, args_input, args_task, diffuser)
         self.n_drop = n_drop
 
     def query(self, n):
