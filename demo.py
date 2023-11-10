@@ -24,7 +24,6 @@ os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 if __name__ == '__main__':
 
-
 	# parameters
 	args_input = arguments.get_args()
 	NUM_QUERY = args_input.batch
@@ -33,6 +32,8 @@ if __name__ == '__main__':
 	DATA_NAME = args_input.dataset_name
 	STRATEGY_NAME = args_input.ALstrategy
 	args_task = args_pool[DATA_NAME]
+
+
 
 	SEED = args_input.seed
 	os.environ['TORCH_HOME']='./basicmodel'
@@ -110,7 +111,8 @@ if __name__ == '__main__':
 			strategy.train(model_name = args_input.ALstrategy)
 		else:
 			strategy.train()
-			# strategy.GAL_train(cycle=0,iter=iteration)
+			if args_input.GAL_active:
+				strategy.GAL_train(cycle=0,iter=iteration)
 
 		preds = strategy.predict(dataset.get_test_data())
 		acc[0] = dataset.cal_test_acc(preds)
@@ -137,8 +139,11 @@ if __name__ == '__main__':
 			elif args_input.ALstrategy == 'WAAL':
 				strategy.train(model_name = args_input.ALstrategy)
 			else:
-				strategy.train()
-				# strategy.GAL_train(cycle=rd,iter=iteration)
+
+				if args_input.GAL_active:
+					strategy.GAL_train(cycle=rd,iter=iteration)
+				else:
+					strategy.train()
 
 			# round rd accuracy
 			preds = strategy.predict(dataset.get_test_data())

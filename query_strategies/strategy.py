@@ -64,21 +64,37 @@ class Strategy:
 
                 # epsilons = self.args_task['epsilon']
                 # alphas = self.args_task['alpha']
+
                 total_cycle=(self.args_input.quota+self.args_input.initseed)/self.args_input.batch
-                epsilons = self.args_task['epsilon'] / total_cycle * (cycle + 1) #linear epsilon
+                epsilons = self.args_input.epsilon / total_cycle * (cycle + 1) #linear epsilon
                 print("epsilon=",epsilons)
                 alphas = epsilons / 5.0
                 model=self.net.get_model()
-                emb_num_per_prompt=self.args_task['emb_num_per_prompt']
-                update_step=self.args_task['emb_update_step']
-                samp_num_per_prompt=self.args_task['samp_num_per_prompt']
+                emb_num_per_prompt=self.args_input.emb_num_per_prompt
+                update_step=self.args_input.emb_update_step
+                samp_num_per_prompt=self.args_input.samp_num_per_prompt
                 # samp_num_per_class=self.args_task['samp_num_per_class']
-                samp_num_per_class=int(len(labeled_idxs)/len(labels)) ## for sample numbers
-                data_folder = './generated_data/{}_{}_iter{}'.format(dataset_name,self.args_task['data_folder'],iter)
+                samp_num_per_class=int(len(labeled_idxs)/len(labels)*self.args_input.samp_num_factor) ## for sample numbers
+                data_folder = './generated_data/{}_{}_iter{}'.format(dataset_name,self.args_input.GAL_data_folder,iter)
+
+                GAL_strategy=self.args_input.GALstrategy.lower()
+                if 'margin' in GAL_strategy:
+                    GAL_function=min_margin
+                elif 'confidence' in GAL_strategy:
+                    GAL_function=min_least_confidence
+                elif 'entropy' in GAL_strategy:
+                    GAL_function=max_entropy
+                elif 'random' in GAL_strategy:
+                    GAL_function='random'
+                else:
+                    print('unrecognized GAL strategy')
+
+                template=self.args_input.template
+
                 if not os.path.exists(data_folder):
                     os.makedirs(data_folder)
                 embedding_list_updated = update_embedding_reverse(emb_num_per_prompt,update_step,dataset_name, alphas, epsilons, labels, model,
-                                                                  self.diffuser, self.device, min_margin)
+                                                                  self.diffuser, self.device, GAL_function,template)
                 dataset_sampling(self.diffuser, samp_num_per_class,samp_num_per_prompt, embedding_list_updated, labels, cycle,
                                  data_folder, dataset_name)
                 labeled_data = update_train_loader(data_folder, labeled_data, cycle, dataset_name)

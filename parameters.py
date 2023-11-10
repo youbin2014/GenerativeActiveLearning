@@ -80,7 +80,7 @@ args_pool = {'MNIST':
              'CIFAR10':
                  {'n_epoch': 300,
                   'name': 'CIFAR10',
-                  'data_folder':'Baseline',
+                  'data_folder':'Ablation_text_temp_2',
                   'transform_train': transforms.Compose([transforms.RandomCrop(size=32, padding=4),
                                                          transforms.RandomHorizontalFlip(),
                                                          transforms.ToTensor(),
@@ -101,7 +101,7 @@ args_pool = {'MNIST':
                   'emb_update_step':10,
                   'alpha':1,
                   'emb_num_per_prompt': 6,
-                  'samp_num_per_prompt': 32,
+                  'samp_num_per_prompt': 50,
                   'samp_num_per_class': 100
                     },
              'CIFAR10_imb':

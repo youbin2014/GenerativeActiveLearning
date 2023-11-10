@@ -66,7 +66,7 @@ def update_train_loader(data_folder,train_subset,cycle,dataset_name):
     # train_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True,
     #                                            num_workers=4, pin_memory=True)
     return dataset
-def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
+def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device,template):
     embeddings = []
     label_index=[]
     if dataset == "cifar10":
@@ -74,7 +74,7 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
         for idx,prompt in enumerate(labels):
             if prompt=="Automobile":
                 prompt="Car"
-            prompt="a realistic photo of a {}".format(prompt)
+            prompt=template.format(prompt)
             prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
                 prompt=prompt,
                 device=device,
@@ -87,7 +87,7 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
 
     elif dataset == "svhn":
         for idx,prompt in enumerate(labels):
-            prompt='a house number style image of a single digit' + prompt
+            prompt=template.format(prompt)
             prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
                 prompt=prompt,
                 device=device,
@@ -102,7 +102,7 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
         for idx,prompt in enumerate(labels):
             if prompt=="Automobile":
                 prompt="Car"
-            prompt='a photo of a ' + prompt
+            prompt=template.format(prompt)
             prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
                 prompt=prompt,
                 device=device,
@@ -116,10 +116,11 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
     elif dataset == "tinyimagenet":
         for idx,id in enumerate(labels):
             prompt = labels[id].split(", ")
-            transformed_prompt = ["A photo of a " + prompt[0]]
+            transformed_prompt = [prompt[0]]
             for word in prompt[1:]:
                 transformed_prompt.append("or a " + word)
             prompt = ' '.join(transformed_prompt)
+            prompt=template.format(prompt)
 
             prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
                 prompt=prompt,
@@ -132,9 +133,9 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
 
     # return torch.cat(embeddings,dim=0)
     return embeddings,label_index
-def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,epsilon,labels,model,diffuser,device,AL_function):
+def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,epsilon,labels,model,diffuser,device,AL_function,template):
 
-    embeddings_list,label_index = embedding_prepare(dataset_name,labels, diffuser,imgnum_per_prompt, device)
+    embeddings_list,label_index = embedding_prepare(dataset_name,labels, diffuser,imgnum_per_prompt, device,template)
     embeddings_list_updated=[]
     print("updating embeddings")
     for idx,embeddings in enumerate(embeddings_list):
@@ -143,11 +144,14 @@ def update_embedding_reverse(imgnum_per_prompt,update_step,dataset_name,alpha,ep
         embeddings_original = embeddings.clone()
         # alpha = config["emb_alpha"]
         # epsilon = config["emb_l2_epsilon"]
-        if update_step>0:
+        if epsilon>0:
             for i in range(update_step):
-                embeddings_grad = diffuser.compute_gradient(dataset_name=dataset_name, model=model, prompt_embeds=embeddings,label=label,num_inference_steps=50, AL_function=AL_function,num_images_per_prompt=imgnum_per_prompt)
-                embeddings_grad = embeddings_grad.view(-1,imgnum_per_prompt,embeddings_grad.shape[1],embeddings_grad.shape[2]).mean(dim=1)
-                # embeddings_grad = torch.randn_like(embeddings_grad).to(device=embeddings_grad.device) # for random text opt
+                if AL_function=='random':
+                    embeddings_grad = torch.randn_like(embeddings).to(device=embeddings.device) # for random text opt
+                else:
+                    embeddings_grad = diffuser.compute_gradient(dataset_name=dataset_name, model=model, prompt_embeds=embeddings,label=label,num_inference_steps=50, AL_function=AL_function,num_images_per_prompt=imgnum_per_prompt)
+                    embeddings_grad = embeddings_grad.view(-1,imgnum_per_prompt,embeddings_grad.shape[1],embeddings_grad.shape[2]).mean(dim=1)
+
                 batchsize=embeddings_grad.shape[0]
                 grad_norms = torch.norm(embeddings_grad.view(batchsize, -1), p=2, dim=1) +1e-8  # nopep8
                 embeddings_grad = embeddings_grad / grad_norms.view(batchsize, 1, 1)
