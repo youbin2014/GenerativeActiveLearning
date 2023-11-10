@@ -17,12 +17,13 @@ class Net:
         self.net = net
         self.params = params
         self.device = device
-        self.clf = self.net(pretrained=self.params['pretrained'], num_classes=self.params['num_class']).to(self.device)
 
     def train(self, data):
         n_epoch = self.params['n_epoch']
 
         dim = data.X.shape[1:]
+        self.clf = self.net(dim=dim, pretrained=self.params['pretrained'], num_classes=self.params['num_class']).to(
+            self.device)
 
         self.clf.train()
         if self.params['optimizer'] == 'Adam':
@@ -176,7 +177,7 @@ class CIFAR10_Net(nn.Module):
         # self.features = nn.Sequential(*list(features_tmp))
         # self.classifier = nn.Linear(512, num_classes)
         self.dim = 512
-        self.resnet18=ResNet18()
+        self.resnet18=ResNet18(num_classes=num_classes)
     def forward(self, x):
         # feature = self.features(x)
         # x = feature.view(feature.size(0), -1)
@@ -198,7 +199,8 @@ class CIFAR100_Net(nn.Module):
         # self.features = nn.Sequential(*list(features_tmp))
         # self.classifier = nn.Linear(512, num_classes)
         # self.dim = resnet18.fc.in_features
-        self.resnet18=ResNet18(num_classes=100)
+        self.dim=512
+        self.resnet18=ResNet18(num_classes=num_classes)
 
 
 
@@ -207,8 +209,8 @@ class CIFAR100_Net(nn.Module):
         # feature = self.features(x)
         # x = feature.view(feature.size(0), -1)
         # output = self.classifier(x)
-        output=self.resnet18(x)
-        return output, x
+        output,feature=self.resnet18(x)
+        return output, feature
 
     def get_embedding_dim(self):
         return self.dim

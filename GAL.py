@@ -86,7 +86,7 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
 
 
     elif dataset == "svhn":
-        for prompt in labels:
+        for idx,prompt in enumerate(labels):
             prompt='a house number style image of a single digit' + prompt
             prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
                 prompt=prompt,
@@ -95,10 +95,11 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
                 do_classifier_free_guidance=True,
             )
             embeddings.append(prompt_embeds)
+            label_index.append(idx)
 
     elif dataset == "cifar100":
         # labels = ["Airplane"]
-        for prompt in labels:
+        for idx,prompt in enumerate(labels):
             if prompt=="Automobile":
                 prompt="Car"
             prompt='a photo of a ' + prompt
@@ -109,10 +110,11 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
                 do_classifier_free_guidance=True,
             )
             embeddings.append(prompt_embeds)
+            label_index.append(idx)
 
 
     elif dataset == "tinyimagenet":
-        for id in labels:
+        for idx,id in enumerate(labels):
             prompt = labels[id].split(", ")
             transformed_prompt = ["A photo of a " + prompt[0]]
             for word in prompt[1:]:
@@ -126,6 +128,7 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device):
                 do_classifier_free_guidance=True,
             )
             embeddings.append(prompt_embeds)
+            label_index.append(idx)
 
     # return torch.cat(embeddings,dim=0)
     return embeddings,label_index

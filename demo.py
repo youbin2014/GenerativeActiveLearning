@@ -19,6 +19,9 @@ from parameters import *
 from utils import *
 
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
+
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+
 if __name__ == '__main__':
 
 

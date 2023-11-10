@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="DataSec" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="hah22011@Datasec2.engr.uconn.edu:22 password (2)" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
       <paths name="AL">
@@ -42,6 +42,20 @@
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="hah22011@Datasec2.engr.uconn.edu:22 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/scr/home/hah22011/projects/GAL" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="hah22011@Datasec2.engr.uconn.edu:22 password (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/scr/home/hah22011/projects/GAL" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
