@@ -14,7 +14,7 @@ def get_args():
 	#basic arguments
 	parser.add_argument('--ALstrategy', '-a', default='MarginSampling', type=str, help='name of active learning strategies')
 	parser.add_argument('--GALstrategy', '-ga', default='MarginSampling', type=str,help='name of active learning strategies')
-	parser.add_argument('--GAL_active', '-active', default=False, type=bool, help='whether to add GAL to AL')
+	parser.add_argument('--GAL_active', '-active', default=2, type=int, help='0 for AL, 1 for GAL, 2 for GAL+AL')
 	parser.add_argument('--initseed', '-s', default = 1000, type = int, help = 'Initial pool of labeled data')
 	parser.add_argument('--quota', '-q', default=4000, type=int, help='quota of active learning')
 	parser.add_argument('--batch', '-b', default=1000, type=int, help='batch size in one active learning iteration')

@@ -110,9 +110,14 @@ if __name__ == '__main__':
 		if args_input.ALstrategy == 'WAAL':
 			strategy.train(model_name = args_input.ALstrategy)
 		else:
-			strategy.train()
-			if args_input.GAL_active:
-				strategy.GAL_train(cycle=0,iter=iteration)
+			if args_input.GAL_active==0:
+				strategy.train()
+			if args_input.GAL_active==1:
+				strategy.GAL_train(cycle=0,iter=iteration,GAL_active=1)
+			if args_input.GAL_active==2:
+				strategy.train()
+				strategy.GAL_train(cycle=0, iter=iteration, GAL_active=2)
+
 
 		preds = strategy.predict(dataset.get_test_data())
 		acc[0] = dataset.cal_test_acc(preds)
@@ -140,8 +145,9 @@ if __name__ == '__main__':
 				strategy.train(model_name = args_input.ALstrategy)
 			else:
 
-				if args_input.GAL_active:
-					strategy.GAL_train(cycle=rd,iter=iteration)
+				if args_input.GAL_active>0:
+					# strategy.train() #for epsilon ablation study only
+					strategy.GAL_train(cycle=rd,iter=iteration,GAL_active=args_input.GAL_active)
 				else:
 					strategy.train()
 
