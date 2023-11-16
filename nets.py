@@ -20,8 +20,10 @@ class Net:
 
     def train(self, data):
         n_epoch = self.params['n_epoch']
-
-        dim = data.X.shape[1:]
+        if data.X.shape:
+            dim = data.X.shape[1:]
+        else:
+            dim=None
         self.clf = self.net(dim=dim, pretrained=self.params['pretrained'], num_classes=self.params['num_class']).to(
             self.device)
 
@@ -107,7 +109,12 @@ class Net:
         return probs
 
     def get_model(self):
-        return self.clf
+        if self.clf:
+            return self.clf
+        else:
+            self.clf = self.net(dim=None, pretrained=self.params['pretrained'], num_classes=self.params['num_class']).to(
+                self.device)
+            return self.clf
 
     def get_embeddings(self, data):
         self.clf.eval()
@@ -360,17 +367,22 @@ class CIFAR200_Net(nn.Module):
         self.model_ft = models.resnet18(pretrained=True)
         # Finetune Final few layers to adjust for tiny imagenet input
         self.model_ft.avgpool = nn.AdaptiveAvgPool2d(1)
+        features_tmp = nn.Sequential(*list(self.model_ft.children())[:-1])
+        self.features = nn.Sequential(*list(features_tmp))
+
         num_ftrs = self.model_ft.fc.in_features
         self.model_ft.fc = nn.Linear(num_ftrs, 200)
+        self.dim=num_ftrs
 
 
     def forward(self, x):
-        # feature = self.features(x)
-        # x = feature.view(feature.size(0), -1)
+        feature = self.features(x)
+        feature = feature.view(feature.size(0), -1)
         # output = self.classifier(x)
         # output=self.resnet18(x)
-        output = self.model_ft(x)
-        return output, x
+        # output = self.model_ft(x)
+        output=self.model_ft.fc(feature)
+        return output, feature
 
     def get_embedding_dim(self):
         return self.dim

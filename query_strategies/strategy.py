@@ -46,7 +46,7 @@ class Strategy:
             else:
                 raise NotImplementedError
 
-    def GAL_train(self, data = None, model_name = None,cycle=None,iter=None):
+    def GAL_train(self, data = None, model_name = None,cycle=None,iter=None, GAL_active=None):
         # Get the current working directory
         current_directory = os.getcwd()
         if model_name == None:
@@ -62,13 +62,14 @@ class Strategy:
                 else:
                     labels = self.args_task['labels']
 
-                # epsilons = self.args_task['epsilon']
+                # epsilons = self.args_task['epsilon'] #for epsilon ablation study
                 # alphas = self.args_task['alpha']
 
                 total_cycle=(self.args_input.quota+self.args_input.initseed)/self.args_input.batch
                 epsilons = self.args_input.epsilon / total_cycle * (cycle + 1) #linear epsilon
+                # epsilons = self.args_input.epsilon
                 print("epsilon=",epsilons)
-                alphas = epsilons / 5.0
+                alphas = epsilons / self.args_input.alpha_factor
                 model=self.net.get_model()
                 emb_num_per_prompt=self.args_input.emb_num_per_prompt
                 update_step=self.args_input.emb_update_step
@@ -84,6 +85,8 @@ class Strategy:
                     GAL_function=min_least_confidence
                 elif 'entropy' in GAL_strategy:
                     GAL_function=max_entropy
+                elif 'min_loss' in GAL_strategy:
+                    GAL_function=pseudo_loss
                 elif 'random' in GAL_strategy:
                     GAL_function='random'
                 else:
@@ -97,7 +100,7 @@ class Strategy:
                                                                   self.diffuser, self.device, GAL_function,template)
                 dataset_sampling(self.diffuser, samp_num_per_class,samp_num_per_prompt, embedding_list_updated, labels, cycle,
                                  data_folder, dataset_name)
-                labeled_data = update_train_loader(data_folder, labeled_data, cycle, dataset_name)
+                labeled_data = update_train_loader(data_folder, labeled_data, cycle, dataset_name,GAL_active)
                 self.net.train(labeled_data)
             else:
                 self.net.train(data)
