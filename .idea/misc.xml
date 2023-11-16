@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.9.18 (sftp://hah22011@Datasec2.engr.uconn.edu:22/home/hah22011/anaconda3/envs/GAL/bin/python)" project-jdk-type="Python SDK" />
+  <component name="Black">
+    <option name="sdkName" value="Remote Python 3.7.13 (sftp://shy23010@Datasec2.engr.uconn.edu:22/home/shy23010/anaconda3/envs/deepAL/bin/python3)" />
+  </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.9.18 (sftp://shy23010@Datasec2.engr.uconn.edu:22/home/shy23010/anaconda3/envs/GAL/bin/python3.9)" project-jdk-type="Python SDK" />
 </project>

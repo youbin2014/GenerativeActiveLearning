@@ -195,6 +195,134 @@ class CIFAR10_Net(nn.Module):
     def get_embedding_dim(self):
         return self.dim
 
+class CIFAR10_Net_vgg(nn.Module):  ## vgg16 model
+    def __init__(self, dim=28 * 28, pretrained=False, num_classes=10):
+        super().__init__()
+        cfg = {
+            'VGG11': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+            'VGG13': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+            'VGG16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
+            'VGG19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512,
+                      'M'],
+        }
+        self.features = self._make_layers(cfg['VGG16'])
+        self.classifier = nn.Linear(512, 10)
+        self.dim = 4096  # Dimension of the input to the classifier
+
+    def forward(self, x):
+        # Flatten the output of the convolutional layers
+        x = self.features(x)
+        x = x.view(x.size(0), -1)
+
+        # Pass through the classifier
+        output = self.classifier(x)
+        return output, x
+
+    def get_embedding_dim(self):
+        return self.dim
+
+    def _make_layers(self, cfg):
+        layers = []
+        in_channels = 3
+        for x in cfg:
+            if x == 'M':
+                layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+            else:
+                layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
+                           nn.BatchNorm2d(x),
+                           nn.ReLU(inplace=True)]
+                in_channels = x
+        layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
+        return nn.Sequential(*layers)
+
+
+class CIFAR10_Net_densenet(nn.Module):
+    def __init__(self, dim=28 * 28, pretrained=False, num_classes=10):
+        super().__init__()
+        from arch.densenet import DenseNet121
+        # resnet18 = models.resnet18(pretrained=pretrained)
+        # features_tmp = nn.Sequential(*list(resnet18.children())[:-1])
+        # features_tmp[0] = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        # self.features = nn.Sequential(*list(features_tmp))
+        # self.classifier = nn.Linear(512, num_classes)
+        self.dim = 512
+        self.densenet121=DenseNet121()
+    def forward(self, x):
+        # feature = self.features(x)
+        # x = feature.view(feature.size(0), -1)
+        # output = self.classifier(x)
+        output,feature=self.densenet121(x)
+        return output, feature
+
+    def get_embedding_dim(self):
+        return self.dim
+
+
+class CIFAR10_Net_mobilenetv2(nn.Module):
+    def __init__(self, dim=28 * 28, pretrained=False, num_classes=10):
+        super().__init__()
+        from arch.mobilenetv2 import MobileNetV2
+        # resnet18 = models.resnet18(pretrained=pretrained)
+        # features_tmp = nn.Sequential(*list(resnet18.children())[:-1])
+        # features_tmp[0] = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        # self.features = nn.Sequential(*list(features_tmp))
+        # self.classifier = nn.Linear(512, num_classes)
+        self.dim = 512
+        self.mobilenetv2=MobileNetV2()
+    def forward(self, x):
+        # feature = self.features(x)
+        # x = feature.view(feature.size(0), -1)
+        # output = self.classifier(x)
+        output,feature=self.mobilenetv2(x)
+        return output, feature
+
+    def get_embedding_dim(self):
+        return self.dim
+
+
+class CIFAR10_Net_dla(nn.Module):
+    def __init__(self, dim=28 * 28, pretrained=False, num_classes=10):
+        super().__init__()
+        from arch.dla import DLA
+        # resnet18 = models.resnet18(pretrained=pretrained)
+        # features_tmp = nn.Sequential(*list(resnet18.children())[:-1])
+        # features_tmp[0] = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        # self.features = nn.Sequential(*list(features_tmp))
+        # self.classifier = nn.Linear(512, num_classes)
+        self.dim = 512
+        self.dla=DLA()
+    def forward(self, x):
+        # feature = self.features(x)
+        # x = feature.view(feature.size(0), -1)
+        # output = self.classifier(x)
+        output,feature=self.dla(x)
+        return output, feature
+
+    def get_embedding_dim(self):
+        return self.dim
+
+
+class CIFAR10_Net_dpn(nn.Module):
+    def __init__(self, dim=28 * 28, pretrained=False, num_classes=10):
+        super().__init__()
+        from arch.dpn import DPN92
+        # resnet18 = models.resnet18(pretrained=pretrained)
+        # features_tmp = nn.Sequential(*list(resnet18.children())[:-1])
+        # features_tmp[0] = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        # self.features = nn.Sequential(*list(features_tmp))
+        # self.classifier = nn.Linear(512, num_classes)
+        self.dim = 512
+        self.dpn=DPN92()
+    def forward(self, x):
+        # feature = self.features(x)
+        # x = feature.view(feature.size(0), -1)
+        # output = self.classifier(x)
+        output,feature=self.dpn(x)
+        return output, feature
+
+    def get_embedding_dim(self):
+        return self.dim
+
 
 class CIFAR100_Net(nn.Module):
     def __init__(self, dim=28 * 28, pretrained=False, num_classes=10):

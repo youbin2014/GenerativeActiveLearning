@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="hah22011@Datasec2.engr.uconn.edu:22 password (2)" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="shy23010@Datasec2.engr.uconn.edu:22 password (4)" filePermissions="511" folderPermissions="511" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
       <paths name="AL">
@@ -10,52 +10,94 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="DataSec">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/projects/deepALplus" local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="DataSec (2)">
+      <paths name="shy23010@137.99.227.19:22 password">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="DataSec (3)">
+      <paths name="shy23010@137.99.227.19:22 password (2)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="DataSec (4)">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/home/hah22011/projects/deepALplus" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="DataSec (5)">
+      <paths name="shy23010@137.99.227.19:22 password (3)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="hah22011@Datasec2.engr.uconn.edu:22 password">
+      <paths name="shy23010@137.99.227.19:22 password (4)">
         <serverdata>
           <mappings>
-            <mapping deploy="/scr/home/hah22011/projects/GAL" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="hah22011@Datasec2.engr.uconn.edu:22 password (2)">
+      <paths name="shy23010@137.99.227.19:22 password (5)">
         <serverdata>
           <mappings>
-            <mapping deploy="/scr/home/hah22011/projects/GAL" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="shy23010@137.99.227.19:22 password (6)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="shy23010@137.99.227.19:22 password (7)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="shy23010@137.99.227.19:22 password (8)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="shy23010@137.99.227.19:22 password (9)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="shy23010@Datasec2.engr.uconn.edu:22 password">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="shy23010@Datasec2.engr.uconn.edu:22 password (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/scr/home/shy23010/GenerativeActiveLearning" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="shy23010@Datasec2.engr.uconn.edu:22 password (3)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="shy23010@Datasec2.engr.uconn.edu:22 password (4)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/scr/home/shy23010/GenerativeActiveLearning" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
