@@ -73,7 +73,7 @@ if __name__ == '__main__':
 		elif args_input.ALstrategy == 'WAAL':
 			net = get_net_waal(args_input.dataset_name, args_task, device)		# load network
 		else:
-			net = get_net(args_input.dataset_name, args_task, device)			# load network
+			net = get_net(args_input.net_name, args_input.dataset_name, args_task, device)			# load network
 
 		# model_id = "stabilityai/stable-diffusion-2-1"
 		# model_id = "stabilityai/stable-diffusion-2-base"
