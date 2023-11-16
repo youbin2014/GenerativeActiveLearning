@@ -20,7 +20,7 @@ class Net:
 
     def train(self, data):
         n_epoch = self.params['n_epoch']
-        if data.X.shape:
+        if data.X:
             dim = data.X.shape[1:]
         else:
             dim=None
@@ -109,9 +109,9 @@ class Net:
         return probs
 
     def get_model(self):
-        if self.clf:
+        try:
             return self.clf
-        else:
+        except:
             self.clf = self.net(dim=None, pretrained=self.params['pretrained'], num_classes=self.params['num_class']).to(
                 self.device)
             return self.clf

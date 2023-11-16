@@ -14,7 +14,10 @@ class CombinedDataset(Dataset):
     def __init__(self, dataset1, dataset2):
         self.dataset1 = dataset1
         self.dataset2 = dataset2
-        self.X = dataset1.X  # Just for compatibility, will not store any actual data
+        if len(dataset1) == 0:
+            self.X = None
+        else:
+            self.X = dataset1.X  # Just for compatibility, will not store any actual data
 
     def __getitem__(self, index):
         # Check if the index belongs to the first dataset
