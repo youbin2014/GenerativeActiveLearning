@@ -29,7 +29,7 @@ class CombinedDataset(Dataset):
     def __len__(self):
         return len(self.dataset1) + len(self.dataset2)
 
-def update_train_loader(data_folder,train_subset,cycle,dataset_name):
+def update_train_loader(data_folder,train_subset,cycle,dataset_name,GAL_active):
     if dataset_name == 'cifar10':
         transform = transforms.Compose([
             transforms.Resize((32, 32)),  # Resize images to CIFAR10 resolution
@@ -62,7 +62,8 @@ def update_train_loader(data_folder,train_subset,cycle,dataset_name):
     labeled_dataset = ImageFolder(root=os.path.join(data_folder, "cycle{}".format(cycle)),
                           transform=transform)
     dataset=CombinedDataset(train_subset, labeled_dataset)
-    # dataset = CombinedDataset([], labeled_dataset)
+    if GAL_active==1:
+        dataset = CombinedDataset([], labeled_dataset)
     # train_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True,
     #                                            num_workers=4, pin_memory=True)
     return dataset
@@ -75,6 +76,7 @@ def embedding_prepare(dataset,labels, diffuser,num_images_per_prompt,device,temp
             if prompt=="Automobile":
                 prompt="Car"
             prompt=template.format(prompt)
+            # prompt='a photo of an animal'
             prompt_embeds,negative_prompt_embeds = diffuser.encode_prompt(
                 prompt=prompt,
                 device=device,

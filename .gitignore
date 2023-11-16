@@ -4,3 +4,4 @@
 ./__pycache__
 ./results
 ./.idea
+./paper_utils
